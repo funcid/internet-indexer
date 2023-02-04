@@ -29,7 +29,9 @@ fun String.createHttpsConnection(apply: HttpsURLConnection.() -> Unit) {
 
 fun HttpsURLConnection.setCredentials(login: String, password: String) {
 
-    val auth = "Basic ${Base64.getEncoder().encodeToString("$login:$password".toByteArray())}"
+    val buffer = "$login:$password".toByteArray()
+    val encoded = Base64.getEncoder().encodeToString(buffer)
+    val auth = "Basic $encoded"
 
     setRequestProperty("Authorization", auth)
 }
