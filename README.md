@@ -5,6 +5,8 @@ goes to filled URL and extract links to another URLs from an HTML page,
 and again, and again. All conclusions save to an OpenSearch. That is 
 needed to make search on data.
 
+<img src="https://user-images.githubusercontent.com/42806772/216792496-866ee9c0-7464-45c6-b8a8-ab6fddc4edbe.png" width="600" height="300">
+
 Example of `docker-compose.yml` for OpenSearch: 
 
 ```yaml
