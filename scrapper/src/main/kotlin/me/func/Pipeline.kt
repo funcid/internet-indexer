@@ -1,6 +1,7 @@
 package me.func
 
 import me.func.shema.Node
+import me.func.util.prop
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.ConcurrentSkipListSet
@@ -14,8 +15,9 @@ object Pipeline {
 
     private val LOGGER = LoggerFactory.getLogger(Pipeline::class.java)
 
-    private val ROOT_PAGE = Configuration.read("crawler-root-page", "https://github.com")
-    private val THREAD_AMOUNT = Configuration.read("crawler-thread-size", "10").toInt()
+    private val ROOT_PAGE = prop("crawler-root-page", "https://github.com")
+
+    private val THREAD_AMOUNT = prop("crawler-thread-size", "10").toInt()
     private val THREAD_POOL: ExecutorService = Executors.newFixedThreadPool(THREAD_AMOUNT)
 
     init {

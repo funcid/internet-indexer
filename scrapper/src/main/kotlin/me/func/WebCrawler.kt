@@ -3,79 +3,82 @@ package me.func
 import me.func.shema.Node
 import me.func.storage.OpenSearchStorage
 import me.func.storage.Storage
-import me.func.util.HREF_CONTENT_PATTERN
-import me.func.util.HTML_P_TAG
-import me.func.util.HTML_TITLE_TAG
-import me.func.util.createReader
+import me.func.util.*
 import org.slf4j.LoggerFactory
 
 object WebCrawler {
 
     private val storage: Storage = OpenSearchStorage(
-        Configuration.read("open-search-remote"),
-        Configuration.read("open-search-index")
+        prop("open-search-remote"),
+        prop("open-search-index")
     )
 
-    private val defaultConnectionTimeout = Configuration.read("crawler-connection-timeout", "3000").toInt()
-    private val defaultReadTimeout = Configuration.read("crawler-connection-timeout", "3000").toInt()
+    private val defaultConnectionTimeout = prop("crawler-connection-timeout", "3000").toInt()
+    private val defaultReadTimeout = prop("crawler-read-timeout", "3000").toInt()
+    private val connectionRetryCount = prop("crawler-reties-count", "10").toInt()
 
     private val logger = LoggerFactory.getLogger(WebCrawler::class.java)
 
-    fun crawl(rootNode: Node, loop: Int = 0): Collection<Node> {
+    fun crawl(node: Node): Collection<Node> {
 
-        if (loop > 6) {
+        val page = tryReadWebPage(node) ?: return setOf()
+
+        node.title = HTML_TITLE_TAG.find(page)?.groupValues?.get(1) ?: "none"
+
+        node.content = HTML_P_TAG.findAll(page)
+            .map { it.groupValues[1] }
+            .toHashSet()
+
+        val childrenPages = extractUrlsFromWebPage(page, node)
+
+        storage.asyncStore(node)
+
+        return childrenPages
+    }
+
+    private fun tryReadWebPage(node: Node, loop: Int = 0): String? {
+
+        if (loop > connectionRetryCount) {
             logger.info("Bad server!")
-            return setOf()
+            return null
         }
 
-        val urls = hashSetOf<Node>()
-        val page: String
+        return try {
 
-        try {
-            page = rootNode.url.createReader {
+            node.url.createReader {
                 connectTimeout = defaultConnectionTimeout
                 readTimeout = defaultReadTimeout
             }.readText()
         } catch (exception: Exception) {
-            return if (exception.message?.contains("connect timed out") == true) {
-                crawl(rootNode, loop + 1)
-            } else {
-                logger.info(exception.message)
-                urls
-            }
+
+            logger.info(exception.message)
+            tryReadWebPage(node, loop + 1)
         }
+    }
 
-        val title = HTML_TITLE_TAG.find(page)?.groupValues?.get(1) ?: "none"
+    private fun extractUrlsFromWebPage(page: String, previousNode: Node) = page
+        .split("\n")
+        .asSequence()
+        .filter { it.contains("http") }
+        .map(HREF_CONTENT_PATTERN::matcher)
+        .map {
 
-        rootNode.content = HTML_P_TAG.findAll(page)
-            .map { it.groupValues[1] }
-            .toHashSet()
+            val set = hashSetOf<Node>()
 
-        rootNode.title = title
+            while (it.find()) {
 
-        page.split("\n").forEach {
-
-            if (!it.contains("http")) return@forEach
-
-            val matcher = HREF_CONTENT_PATTERN.matcher(it)
-
-            while (matcher.find()) {
-
-                val link = matcher.group(1)
+                val link = it.group(1)
                     .split("/")
                     .take(3)
                     .joinToString("/")
-                val node = Node(link, rootNode.url)
 
-                if (rootNode.url == link || urls.contains(node)) continue
+                if (previousNode.url == link) continue
 
-                urls.add(node)
+                set.add(Node(link, previousNode.url))
             }
-        }
 
-        storage.asyncStore(rootNode)
-
-        return urls
-    }
+            set
+        }.flatten()
+        .toHashSet()
 
 }

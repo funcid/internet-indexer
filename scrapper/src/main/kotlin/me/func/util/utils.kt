@@ -2,12 +2,15 @@ package me.func.util
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import me.func.Configuration
 import java.io.OutputStreamWriter
 import java.net.URL
 import java.net.URLConnection
 import java.nio.charset.Charset
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+
+fun prop(key: String, default: String = "") = Configuration.read(key, default)
 
 fun String.createReader(apply: URLConnection.() -> Unit) = URL(this)
     .openConnection()
@@ -29,6 +32,10 @@ fun HttpsURLConnection.setCredentials(login: String, password: String) {
     val auth = "Basic ${Base64.getEncoder().encodeToString("$login:$password".toByteArray())}"
 
     setRequestProperty("Authorization", auth)
+}
+
+fun HttpsURLConnection.setJsonType() {
+
     setRequestProperty("Content-Type", "application/json")
     setRequestProperty("Accept", "application/json")
 }

@@ -2,9 +2,7 @@ package me.func.storage
 
 import me.func.Configuration
 import me.func.shema.Node
-import me.func.util.createHttpsConnection
-import me.func.util.setCredentials
-import me.func.util.writeObjectAsJson
+import me.func.util.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
@@ -14,8 +12,8 @@ class OpenSearchStorage(private var remote: String, private val index: String) :
     companion object {
         private val LOGGER = LoggerFactory.getLogger(OpenSearchStorage::class.java)
 
-        private val LOGIN = Configuration.read("open-search-login", "admin")
-        private val PASSWORD = Configuration.read("open-search-password", "admin")
+        private val LOGIN = prop("open-search-login", "admin")
+        private val PASSWORD = prop("open-search-password", "admin")
     }
 
     private val counter = AtomicInteger(1)
@@ -34,6 +32,7 @@ class OpenSearchStorage(private var remote: String, private val index: String) :
             doOutput = true
 
             setCredentials(LOGIN, PASSWORD)
+            setJsonType()
             writeObjectAsJson(node)
 
             LOGGER.info("response code: $responseCode $responseMessage")
