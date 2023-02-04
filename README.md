@@ -7,7 +7,9 @@ needed to make search on data.
 
 <img src="https://user-images.githubusercontent.com/42806772/216792496-866ee9c0-7464-45c6-b8a8-ab6fddc4edbe.png" width="600" height="300">
 
-Example of `docker-compose.yml` for OpenSearch: 
+Example of `docker-compose.yml` for OpenSearch 
+(if you run it on VM, set `sysctl -w vm.max_map_count=262144` in a `/var/lib/boot2docker/profile`, 
+problem https://github.com/boot2docker/boot2docker/issues/1216): 
 
 ```yaml
 version: '3'
