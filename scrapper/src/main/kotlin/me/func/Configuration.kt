@@ -11,6 +11,7 @@ object Configuration {
     private val PROPERTIES = Properties()
 
     init {
+        // get config file in a resources
         PROPERTIES.load(this@Configuration.javaClass.classLoader.getResourceAsStream(CONFIG_FILE))
 
         LOGGER.info("Application configured successfully!")

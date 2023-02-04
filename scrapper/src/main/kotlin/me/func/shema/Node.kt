@@ -9,5 +9,5 @@ data class Node(
     @SerialName("previous_name")
     val rootPage: String,
     var title: String = "none",
-    var content: MutableSet<String> = hashSetOf(),
+    var content: Set<String> = hashSetOf(),
 )

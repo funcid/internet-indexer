@@ -19,7 +19,11 @@ class OpenSearchStorage(private var remote: String, private val index: String) :
     private val counter = AtomicInteger(1)
 
     init {
-        if (!remote.startsWith("https")) remote = "https://$remote"
+
+        // always remote must start with `https`
+        if (!remote.startsWith("https")) {
+            remote = "https://$remote"
+        }
     }
 
     override fun store(node: Node) {
@@ -35,7 +39,7 @@ class OpenSearchStorage(private var remote: String, private val index: String) :
             setJsonType()
             writeObjectAsJson(node)
 
-            LOGGER.info("response code: $responseCode $responseMessage")
+            LOGGER.info("Store request! Code: $responseCode, message: $responseMessage, url: ${node.url}")
         }
     }
 

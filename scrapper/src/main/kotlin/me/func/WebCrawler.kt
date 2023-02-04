@@ -17,20 +17,24 @@ object WebCrawler {
     private val defaultReadTimeout = prop("crawler-read-timeout", "3000").toInt()
     private val connectionRetryCount = prop("crawler-reties-count", "10").toInt()
 
-    private val logger = LoggerFactory.getLogger(WebCrawler::class.java)
+    private val LOGGER = LoggerFactory.getLogger(WebCrawler::class.java)
 
     fun crawl(node: Node): Collection<Node> {
 
+        // getting HTML page by URL with retries
         val page = tryReadWebPage(node) ?: return setOf()
 
+        // extract title from HTML
         node.title = HTML_TITLE_TAG.find(page)?.groupValues?.get(1) ?: "none"
 
+        // extract content from HTML
         node.content = HTML_P_TAG.findAll(page)
             .map { it.groupValues[1] }
             .toHashSet()
 
         val childrenPages = extractUrlsFromWebPage(page, node)
 
+        // store title, content to open search and free current thread
         storage.asyncStore(node)
 
         return childrenPages
@@ -39,7 +43,8 @@ object WebCrawler {
     private fun tryReadWebPage(node: Node, loop: Int = 0): String? {
 
         if (loop > connectionRetryCount) {
-            logger.info("Bad server!")
+
+            LOGGER.info("Too many retries!")
             return null
         }
 
@@ -51,7 +56,7 @@ object WebCrawler {
             }.readText()
         } catch (exception: Exception) {
 
-            logger.info(exception.message)
+            LOGGER.info(exception.message)
             tryReadWebPage(node, loop + 1)
         }
     }

@@ -22,6 +22,7 @@ object Pipeline {
 
     init {
 
+        // fill first page in a stack to start crawl web from this
         STACK.push(
             Node(
                 ROOT_PAGE,
@@ -38,6 +39,7 @@ object Pipeline {
 
         fillThreadPool(times = THREAD_AMOUNT) {
 
+            // getting top url to crawl from reentrant stack
             val node = try {
                 STACK.pop()
             } catch (exception: Exception) {
@@ -52,6 +54,7 @@ object Pipeline {
 
             LOGGER.info("Crawled ${crawl.size} urls")
 
+            // fill new pages to stack
             STACK.addAll(crawl)
         }
     }
@@ -59,6 +62,7 @@ object Pipeline {
 
     private fun fillThreadPool(times: Int, task: Runnable) {
 
+        // set infinite tasks to thread pool
         repeat(times) {
             THREAD_POOL.execute {
                 while (true) {
