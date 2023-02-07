@@ -1,4 +1,4 @@
-# web-tree
+# web-crawler
 
 Open source example of web crawler, user puts a URL, program 
 goes to filled URL and extract links to another URLs from an HTML page,
