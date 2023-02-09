@@ -96,7 +96,7 @@ disable-certificate-trust=true
 
 Create index example:
 
-```
+```json
 PUT internet
 {
   "settings": {
@@ -109,7 +109,7 @@ PUT internet
         "analyzer-name": {
           "type": "custom",
           "tokenizer": "whitespace",
-          "filter" : "lowercase"
+          "filter": "lowercase"
         }
       }
     }
@@ -139,7 +139,7 @@ PUT internet
 
 Search example:
 
-```
+```json
 GET internet/_search
 {
   "query": {
