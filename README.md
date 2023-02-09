@@ -93,3 +93,59 @@ crawler-read-timeout=2000
 crawler-reties-count=10
 disable-certificate-trust=true
 ```
+
+Create index example:
+
+```
+PUT internet
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "analysis": {
+      "analyzer": {
+        "analyzer-name": {
+          "type": "custom",
+          "tokenizer": "whitespace",
+          "filter" : "lowercase"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "url": {
+        "type": "text",
+        "analyzer": "analyzer-name"
+      },
+      "previous_page": {
+        "type": "text",
+        "analyzer": "analyzer-name"
+      },
+       "content": {
+        "type": "text",
+        "analyzer": "analyzer-name"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "analyzer-name"
+      }
+    }
+  }
+}
+```
+
+Search example:
+
+```
+GET internet/_search
+{
+  "query": {
+    "match": {
+      "content": "WORD"
+    }
+  }
+}
+```
